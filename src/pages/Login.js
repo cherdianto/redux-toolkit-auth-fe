@@ -1,13 +1,33 @@
 import { useState, useEffect } from 'react'
 import { FaSignInAlt } from 'react-icons/fa'
+import { useDispatch, useSelector } from 'react-redux'
+import { login, reset } from '../features/auth/authSlice'
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 
 function Login() {
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+    const { isError, isLoading, isSuccess, user, message } = useSelector((state) => state.auth)
+
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     })
 
     const { email, password } = formData;
+
+    useEffect(() => {
+        if(isError){
+            toast.error(message)
+        }
+
+        if (isSuccess || user){
+            navigate('/')
+        }
+        
+        dispatch(reset())
+    }, [isLoading, isError, isSuccess, navigate, dispatch])
 
     const handleChange = (e) => {
         setFormData((prevState) => ({
@@ -18,7 +38,8 @@ function Login() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('handleSubmit')
+
+        dispatch(login(formData))
     }
 
     return (
